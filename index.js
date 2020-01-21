@@ -22,7 +22,17 @@ server.post("/api/users", (req, res) => {
   } else {
     db.insert(dbInfo)
       .then(users => {
-        res.status(201).json(users);
+        db.findById(users.id)
+          .then(user => {
+            res.status(201).json(user);
+          })
+          .catch(err => {
+            res.status(500).json({
+              errorMessage:
+                "There was an error while saving the user to the database",
+              err
+            });
+          });
       })
       .catch(err => {
         res.status(500).json({
@@ -84,7 +94,19 @@ server.delete("/api/users/:id", (req, res) => {
           errorMessage: "The user with the specified ID does not exist"
         });
       } else {
-        res.status(200).json(user);
+        db.remove(dbInfo).then(users => {
+          db.findById(users.id)
+            .then(user => {
+              res.status(201).json(user);
+            })
+            .catch(err => {
+              res.status(500).json({
+                errorMessage:
+                  "There was an error while saving the user to the database",
+                err
+              });
+            });
+        });
       }
     })
     .catch(err => {
